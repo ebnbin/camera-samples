@@ -57,7 +57,6 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
-    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
 
     // CameraX core library
     def camerax_version = '1.0.0-beta10'

@@ -18,10 +18,8 @@ package com.android.example.cameraxbasic.fragments
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
@@ -33,7 +31,6 @@ import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -57,14 +54,8 @@ import androidx.core.net.toFile
 import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.android.example.cameraxbasic.KEY_EVENT_ACTION
-import com.android.example.cameraxbasic.KEY_EVENT_EXTRA
 import com.android.example.cameraxbasic.MainActivity
 import com.android.example.cameraxbasic.R
-import com.android.example.cameraxbasic.utils.ANIMATION_FAST_MILLIS
-import com.android.example.cameraxbasic.utils.ANIMATION_SLOW_MILLIS
-import com.android.example.cameraxbasic.utils.simulateClick
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.coroutines.Dispatchers
@@ -95,7 +86,6 @@ class CameraFragment : Fragment() {
     private lateinit var container: ConstraintLayout
     private lateinit var viewFinder: PreviewView
     private lateinit var outputDirectory: File
-    private lateinit var broadcastManager: LocalBroadcastManager
 
     private var displayId: Int = -1
     private var lensFacing: Int = CameraSelector.LENS_FACING_BACK
@@ -111,20 +101,6 @@ class CameraFragment : Fragment() {
 
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
-
-    /** Volume down button receiver used to trigger shutter */
-    private val volumeDownReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.getIntExtra(KEY_EVENT_EXTRA, KeyEvent.KEYCODE_UNKNOWN)) {
-                // When the volume down button is pressed, simulate a shutter button click
-                KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                    val shutter = container
-                            .findViewById<ImageButton>(R.id.camera_capture_button)
-                    shutter.simulateClick()
-                }
-            }
-        }
-    }
 
     /**
      * We need a display listener for orientation changes that do not trigger a configuration
@@ -159,7 +135,6 @@ class CameraFragment : Fragment() {
         cameraExecutor.shutdown()
 
         // Unregister the broadcast receivers and listeners
-        broadcastManager.unregisterReceiver(volumeDownReceiver)
         displayManager.unregisterDisplayListener(displayListener)
     }
 
@@ -195,12 +170,6 @@ class CameraFragment : Fragment() {
 
         // Initialize our background executor
         cameraExecutor = Executors.newSingleThreadExecutor()
-
-        broadcastManager = LocalBroadcastManager.getInstance(view.context)
-
-        // Set up the intent filter that will receive events from our main activity
-        val filter = IntentFilter().apply { addAction(KEY_EVENT_ACTION) }
-        broadcastManager.registerReceiver(volumeDownReceiver, filter)
 
         // Every time the orientation of device changes, update rotation for use cases
         displayManager.registerDisplayListener(displayListener, null)
@@ -597,3 +566,7 @@ class CameraFragment : Fragment() {
         val EXTENSION_WHITELIST = arrayOf("JPG")
     }
 }
+
+/** Milliseconds used for UI animations */
+private const val ANIMATION_FAST_MILLIS = 50L
+private const val ANIMATION_SLOW_MILLIS = 100L

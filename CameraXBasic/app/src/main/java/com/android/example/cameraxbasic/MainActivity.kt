@@ -17,18 +17,12 @@
 package com.android.example.cameraxbasic
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.android.example.cameraxbasic.fragments.CameraFragment
-import com.android.example.cameraxbasic.utils.FLAGS_FULLSCREEN
 import java.io.File
 
-const val KEY_EVENT_ACTION = "key_event_action"
-const val KEY_EVENT_EXTRA = "key_event_extra"
 private const val IMMERSIVE_FLAG_TIMEOUT = 500L
 
 /**
@@ -57,18 +51,6 @@ class MainActivity : AppCompatActivity() {
         }, IMMERSIVE_FLAG_TIMEOUT)
     }
 
-    /** When key down event is triggered, relay it via local broadcast so fragments can handle it */
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        return when (keyCode) {
-            KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                val intent = Intent(KEY_EVENT_ACTION).apply { putExtra(KEY_EVENT_EXTRA, keyCode) }
-                LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
-                true
-            }
-            else -> super.onKeyDown(keyCode, event)
-        }
-    }
-
     companion object {
 
         /** Use external media if it is available, our app's file directory otherwise */
@@ -81,3 +63,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+
+/** Combination of all flags required to put activity into immersive mode */
+private const val FLAGS_FULLSCREEN =
+    View.SYSTEM_UI_FLAG_LOW_PROFILE or
+            View.SYSTEM_UI_FLAG_FULLSCREEN or
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
