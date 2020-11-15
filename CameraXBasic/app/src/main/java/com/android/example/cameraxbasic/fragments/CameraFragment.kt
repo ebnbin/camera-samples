@@ -16,11 +16,13 @@
 
 package com.android.example.cameraxbasic.fragments
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -146,10 +148,8 @@ class CameraFragment : Fragment() {
         super.onResume()
         // Make sure that all permissions are still present, since the
         // user could have removed them while the app was in paused state.
-        if (!PermissionsFragment.hasPermissions(requireContext())) {
-            Navigation.findNavController(requireActivity(), R.id.fragment_container).navigate(
-                    CameraFragmentDirections.actionCameraToPermissions()
-            )
+        if (!hasPermissions(requireContext())) {
+            activity?.finish()
         }
     }
 
@@ -598,5 +598,12 @@ class CameraFragment : Fragment() {
         private fun createFile(baseFolder: File, format: String, extension: String) =
                 File(baseFolder, SimpleDateFormat(format, Locale.US)
                         .format(System.currentTimeMillis()) + extension)
+
+        private val PERMISSIONS_REQUIRED = arrayOf(Manifest.permission.CAMERA)
+
+        /** Convenience method used to check if all permissions required by this app are granted */
+        private fun hasPermissions(context: Context) = PERMISSIONS_REQUIRED.all {
+            ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+        }
     }
 }
