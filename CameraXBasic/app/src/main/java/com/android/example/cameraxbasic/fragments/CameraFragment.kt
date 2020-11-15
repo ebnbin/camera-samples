@@ -466,17 +466,6 @@ class CameraFragment : Fragment() {
                 bindCameraUseCases()
             }
         }
-
-        // Listener for button used to view the most recent photo
-        controls.findViewById<ImageButton>(R.id.photo_view_button).setOnClickListener {
-            // Only navigate when the gallery has photos
-            if (true == outputDirectory.listFiles()?.isNotEmpty()) {
-                Navigation.findNavController(
-                        requireActivity(), R.id.fragment_container
-                ).navigate(CameraFragmentDirections
-                        .actionCameraToGallery(outputDirectory.absolutePath))
-            }
-        }
     }
 
     /** Enabled or disabled a button to switch cameras depending on the available cameras */
@@ -605,5 +594,7 @@ class CameraFragment : Fragment() {
         private fun hasPermissions(context: Context) = PERMISSIONS_REQUIRED.all {
             ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
         }
+
+        val EXTENSION_WHITELIST = arrayOf("JPG")
     }
 }
