@@ -35,7 +35,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.MimeTypeMap
-import android.widget.ImageButton
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraInfoUnavailableException
@@ -51,20 +50,13 @@ import androidx.camera.view.PreviewView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
-import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import com.android.example.cameraxbasic.MainActivity
 import com.android.example.cameraxbasic.R
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.File
 import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
-import java.util.ArrayDeque
-import java.util.Locale
+import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.collections.ArrayList
@@ -143,24 +135,6 @@ class CameraFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.fragment_camera, container, false)
-
-    private fun setGalleryThumbnail(uri: Uri) {
-        // Reference of the view that holds the gallery thumbnail
-        val thumbnail = container.findViewById<ImageButton>(R.id.photo_view_button)
-
-        // Run the operations in the view's thread
-        thumbnail.post {
-
-            // Remove thumbnail padding
-            thumbnail.setPadding(resources.getDimension(R.dimen.stroke_small).toInt())
-
-            // Load thumbnail into circular button using Glide
-            Glide.with(thumbnail)
-                    .load(uri)
-                    .apply(RequestOptions.circleCropTransform())
-                    .into(thumbnail)
-        }
-    }
 
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -326,25 +300,8 @@ class CameraFragment : Fragment() {
     /** Method used to re-draw the camera UI controls, called every time configuration changes. */
     private fun updateCameraUi() {
 
-        // Remove previous UI if any
-        container.findViewById<ConstraintLayout>(R.id.camera_ui_container)?.let {
-            container.removeView(it)
-        }
-
-        // Inflate a new view containing all UI for controlling the camera
-        val controls = View.inflate(requireContext(), R.layout.camera_ui_container, container)
-
-        // In the background, load latest photo taken (if any) for gallery thumbnail
-        lifecycleScope.launch(Dispatchers.IO) {
-            outputDirectory.listFiles { file ->
-                EXTENSION_WHITELIST.contains(file.extension.toUpperCase(Locale.ROOT))
-            }?.max()?.let {
-                setGalleryThumbnail(Uri.fromFile(it))
-            }
-        }
-
         // Listener for button used to capture photo
-        controls.findViewById<ImageButton>(R.id.camera_capture_button).setOnClickListener {
+        viewFinder.setOnClickListener {
 
             // Get a stable reference of the modifiable image capture use case
             imageCapture?.let { imageCapture ->
@@ -374,12 +331,6 @@ class CameraFragment : Fragment() {
                     override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                         val savedUri = output.savedUri ?: Uri.fromFile(photoFile)
                         Log.d(TAG, "Photo capture succeeded: $savedUri")
-
-                        // We can only change the foreground Drawable using API level 23+ API
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            // Update the gallery thumbnail with latest picture taken
-                            setGalleryThumbnail(savedUri)
-                        }
 
                         // Implicit broadcasts will be ignored for devices running API level >= 24
                         // so if you only target API level 24+ you can remove this statement
@@ -418,13 +369,13 @@ class CameraFragment : Fragment() {
         }
 
         // Setup for button used to switch cameras
-        controls.findViewById<ImageButton>(R.id.camera_switch_button).let {
+        viewFinder.let {
 
             // Disable the button until the camera is set up
-            it.isEnabled = false
+            it.isLongClickable = false
 
             // Listener for button used to switch cameras. Only called if the button is enabled
-            it.setOnClickListener {
+            it.setOnLongClickListener {
                 lensFacing = if (CameraSelector.LENS_FACING_FRONT == lensFacing) {
                     CameraSelector.LENS_FACING_BACK
                 } else {
@@ -432,17 +383,17 @@ class CameraFragment : Fragment() {
                 }
                 // Re-bind use cases to update selected camera
                 bindCameraUseCases()
+                true
             }
         }
     }
 
     /** Enabled or disabled a button to switch cameras depending on the available cameras */
     private fun updateCameraSwitchButton() {
-        val switchCamerasButton = container.findViewById<ImageButton>(R.id.camera_switch_button)
         try {
-            switchCamerasButton.isEnabled = hasBackCamera() && hasFrontCamera()
+            viewFinder.isLongClickable = hasBackCamera() && hasFrontCamera()
         } catch (exception: CameraInfoUnavailableException) {
-            switchCamerasButton.isEnabled = false
+            viewFinder.isLongClickable = false
         }
     }
 

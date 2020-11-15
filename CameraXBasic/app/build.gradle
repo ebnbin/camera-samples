@@ -16,7 +16,6 @@
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
 
 android {
@@ -72,8 +71,4 @@ dependencies {
 
     // CameraX Extensions library
     // implementation "androidx.camera:camera-extensions:1.0.0-alpha09"
-
-    // Glide
-    implementation 'com.github.bumptech.glide:glide:4.11.0'
-    kapt 'com.github.bumptech.glide:compiler:4.11.0'
 }
