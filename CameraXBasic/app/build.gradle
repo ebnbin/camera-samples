@@ -18,7 +18,6 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: "androidx.navigation.safeargs"
 
 android {
     compileSdkVersion 30
@@ -58,11 +57,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
-
-    // Navigation library
-    def nav_version = '2.3.0'
-    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
-    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
 
     // CameraX core library
     def camerax_version = '1.0.0-beta10'

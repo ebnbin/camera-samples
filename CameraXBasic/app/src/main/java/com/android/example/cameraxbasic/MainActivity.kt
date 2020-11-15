@@ -17,14 +17,15 @@
 package com.android.example.cameraxbasic
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.KeyEvent
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import java.io.File
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import android.content.Intent
-import android.widget.FrameLayout
+import com.android.example.cameraxbasic.fragments.CameraFragment
 import com.android.example.cameraxbasic.utils.FLAGS_FULLSCREEN
+import java.io.File
 
 const val KEY_EVENT_ACTION = "key_event_action"
 const val KEY_EVENT_EXTRA = "key_event_extra"
@@ -35,12 +36,16 @@ private const val IMMERSIVE_FLAG_TIMEOUT = 500L
  * functionality is implemented in the form of fragments.
  */
 class MainActivity : AppCompatActivity() {
-    private lateinit var container: FrameLayout
+    private lateinit var container: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        container = findViewById(R.id.fragment_container)
+        container = findViewById(android.R.id.content)
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .add(android.R.id.content, CameraFragment())
+                .commitAllowingStateLoss()
+        }
     }
 
     override fun onResume() {
