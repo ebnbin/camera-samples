@@ -47,7 +47,6 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
 import androidx.fragment.app.Fragment
@@ -75,7 +74,6 @@ typealias LumaListener = (luma: Double) -> Unit
  */
 class CameraFragment : Fragment() {
 
-    private lateinit var container: ConstraintLayout
     private lateinit var viewFinder: PreviewView
     private lateinit var outputDirectory: File
 
@@ -134,13 +132,12 @@ class CameraFragment : Fragment() {
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.fragment_camera, container, false)
+            PreviewView(requireContext())
 
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        container = view as ConstraintLayout
-        viewFinder = container.findViewById(R.id.view_finder)
+        viewFinder = view as PreviewView
 
         // Initialize our background executor
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -149,7 +146,7 @@ class CameraFragment : Fragment() {
         displayManager.registerDisplayListener(displayListener, null)
 
         // Determine the output directory
-        outputDirectory = MainActivity.getOutputDirectory(requireContext())
+        outputDirectory = getOutputDirectory(requireContext())
 
         // Wait for the views to be properly laid out
         viewFinder.post {
@@ -355,16 +352,12 @@ class CameraFragment : Fragment() {
                     }
                 })
 
-                // We can only change the foreground Drawable using API level 23+ API
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
-                    // Display flash animation to indicate that photo was captured
-                    container.postDelayed({
-                        container.foreground = ColorDrawable(Color.WHITE)
-                        container.postDelayed(
-                                { container.foreground = null }, ANIMATION_FAST_MILLIS)
-                    }, ANIMATION_SLOW_MILLIS)
-                }
+                // Display flash animation to indicate that photo was captured
+                viewFinder.postDelayed({
+                    viewFinder.foreground = ColorDrawable(Color.WHITE)
+                    viewFinder.postDelayed(
+                            { viewFinder.foreground = null }, ANIMATION_FAST_MILLIS)
+                }, ANIMATION_SLOW_MILLIS)
             }
         }
 
@@ -514,7 +507,14 @@ class CameraFragment : Fragment() {
             ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
         }
 
-        val EXTENSION_WHITELIST = arrayOf("JPG")
+        /** Use external media if it is available, our app's file directory otherwise */
+        private fun getOutputDirectory(context: Context): File {
+            val appContext = context.applicationContext
+            val mediaDir = context.externalMediaDirs.firstOrNull()?.let {
+                File(it, appContext.resources.getString(R.string.app_name)).apply { mkdirs() } }
+            return if (mediaDir != null && mediaDir.exists())
+                mediaDir else appContext.filesDir
+        }
     }
 }
 

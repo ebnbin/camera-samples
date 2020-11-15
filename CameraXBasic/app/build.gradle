@@ -22,7 +22,7 @@ android {
     compileSdkVersion 30
     defaultConfig {
         applicationId "com.android.example.cameraxbasic"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 30
         versionCode 1
         versionName "1.0.0"
@@ -54,7 +54,6 @@ dependencies {
     // App compat and UI things
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
 
     // CameraX core library
     def camerax_version = '1.0.0-beta10'

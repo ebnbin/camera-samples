@@ -37,7 +37,7 @@
         <activity
             android:name=".MainActivity"
             android:clearTaskOnLaunch="true"
-            android:theme="@style/AppTheme"
+            android:theme="@style/Theme.AppCompat.DayNight"
             android:screenOrientation="fullUser"
             android:rotationAnimation="seamless"
             tools:targetApi="O">
